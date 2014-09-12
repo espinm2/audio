@@ -35,6 +35,18 @@ Fluid::~Fluid() {
 // ==============================================================
 
 void Fluid::Load() {    
+  // This function takes in the input file that specifices
+  //
+  // * Grid Dimentions
+  // * Cell Dimensions
+  // * Incompressablity
+  // * Boundries free_slip or not
+  // * Viscosity
+  // * Gravity
+  // * Inital Velocity of particles
+  // * Coorindates of forces on faces
+  //
+  // TODO If there is no input then go ahead run my simulation
 
   // open the file
   std::ifstream istr(std::string(args->path+'/'+args->fluid_file).c_str());

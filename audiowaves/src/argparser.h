@@ -68,32 +68,45 @@ public:
   // ===================================
 
   void DefaultValues() {
+
+    // Default Window Size
     width = 500;
     height = 500;
 
+    // Animation + Physics
     timestep = 0.01;
     animate = false;
 
+    // Set particles visiable
     particles = true;
-    velocity = true;
-    force = true;
 
+    // Set the red arrows visiable at center of boxes
+    // TODO reogranize this to show velocities at particle
+    velocity = false;
+
+    // Used to change the length of faces vector vis
     face_velocity = 0;
     dense_velocity = 0;
 
+    // We don't want any surface stuff right now
+    // TODO Remove this functionality
     surface = false;
     isosurface = 0.7;
 
+    // Wireframe box
     wireframe = false;
     bounding_box = true;
+
+
+    // Extra visualization for orginal water simulation
+    // TODO Remove
     cubes = false;
     pressure = false;
 
+    // Where gravity is in this field
+    // We set gravity to zero
     gravity = glm::vec3(0,-9.8,0);
 
-    // uncomment for deterministic randomness
-    // mtrand = MTRand(37);
-    
   }
 
   // ===================================
