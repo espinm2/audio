@@ -16,6 +16,7 @@ using std::pair;
 
 class ClothParticle {
 public:
+
   // ACCESSORS
   const Vec3f& getOriginalPosition() const{ return original_position; }
   const Vec3f& getPosition() const{ return position; }
