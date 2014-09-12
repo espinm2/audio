@@ -1,0 +1,16 @@
+grid 30 12 4
+
+cell_dimensions 1 1 1
+
+flow incompressible
+xy_boundary free_slip
+yz_boundary free_slip
+zx_boundary free_slip
+viscosity 0.25
+gravity 1
+
+initial_particles left random
+density 15
+
+initial_velocity zero
+

@@ -1,10 +1,14 @@
 #ifndef _BOUNDING_BOX_H_
 #define _BOUNDING_BOX_H_
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <cassert>
 #include <algorithm>
-#include "vectors.h"
-#include "utils.h"
+#include <vector>
+
+#include "vbo_structs.h"
 
 // ====================================================================
 // ====================================================================
@@ -15,61 +19,56 @@ public:
 
   // ========================
   // CONSTRUCTOR & DESTRUCTOR
-  BoundingBox() { Set(Vec3f(0,0,0),Vec3f(0,0,0)); }
-  BoundingBox(const Vec3f &v) { Set(v,v); }
-  BoundingBox(const Vec3f &_minimum, const Vec3f &_maximum) { Set(_minimum,_maximum); }
-  ~BoundingBox() { }
+  BoundingBox() { 
+    Set(glm::vec3(0,0,0),glm::vec3(0,0,0)); }
+  BoundingBox(const glm::vec3 &pos) {
+    Set(pos,pos); }
+  BoundingBox(const glm::vec3 &_minimum, const glm::vec3 &_maximum) { 
+    Set(_minimum,_maximum); }
 
   // =========
   // ACCESSORS
-  void Get(Vec3f &_minimum, Vec3f &_maximum) const {
+  void Get(glm::vec3 &_minimum, glm::vec3 &_maximum) const {
     _minimum = minimum;
     _maximum = maximum; }
-  Vec3f getMin() const { return minimum; }
-  Vec3f getMax() const { return maximum; }
-  void getCenter(Vec3f &c) const {
+  glm::vec3 getMin() const { return minimum; }
+  glm::vec3 getMax() const { return maximum; }
+  void getCenter(glm::vec3 &c) const {
     c = maximum; 
     c -= minimum;
     c *= 0.5f;
     c += minimum;
   }
   double maxDim() const {
-    double x = maximum.x() - minimum.x();
-    double y = maximum.y() - minimum.y();
-    double z = maximum.z() - minimum.z();
-    return my_max(x,my_max(y,z));
+    double x = maximum.x - minimum.x;
+    double y = maximum.y - minimum.y;
+    double z = maximum.z - minimum.z;
+    return std::max(x,std::max(y,z));
   }
 
   // =========
   // MODIFIERS
   void Set(const BoundingBox &bb) {
-      Set(bb.minimum,bb.maximum); 
-  }
-  void Set(const Vec3f &_minimum, const Vec3f &_maximum) {
-    assert (minimum.x() <= maximum.x() &&
-	    minimum.y() <= maximum.y() &&
-	    minimum.z() <= maximum.z());
+    minimum = bb.minimum;
+    maximum = bb.maximum; }
+  void Set(const glm::vec3 &_minimum, const glm::vec3 &_maximum) {
+    assert (minimum.x <= maximum.x &&
+	    minimum.y <= maximum.y &&
+	    minimum.z <= maximum.z);
     minimum = _minimum;
     maximum = _maximum; }
-  void Extend(const Vec3f &v) {
-    minimum = Vec3f(my_min(minimum.x(),v.x()),
-		    my_min(minimum.y(),v.y()),
-		    my_min(minimum.z(),v.z()));
-    maximum = Vec3f(my_max(maximum.x(),v.x()),
-		    my_max(maximum.y(),v.y()),
-		    my_max(maximum.z(),v.z())); 
-  }  
+  void Extend(const glm::vec3 v) {
+    minimum = glm::vec3(std::min(minimum.x,v.x),
+                        std::min(minimum.y,v.y),
+                        std::min(minimum.z,v.z));
+    maximum = glm::vec3(std::max(maximum.x,v.x),
+                        std::max(maximum.y,v.y),
+                        std::max(maximum.z,v.z)); 
+  }
   void Extend(const BoundingBox &bb) {
     Extend(bb.minimum);
     Extend(bb.maximum); 
   }
-
-  // =========
-  // DEBUGGING 
-  void Print(const char *s="") const {
-    printf ("BOUNDING BOX %s: %f %f %f  -> %f %f %f\n", s,
-            minimum.x(),minimum.y(),minimum.z(),
-            maximum.x(),maximum.y(),maximum.z()); }
 
   void initializeVBOs();
   void setupVBOs();
@@ -78,17 +77,20 @@ public:
 
 private:
 
+
   // ==============
   // REPRESENTATION
-  Vec3f minimum;
-  Vec3f maximum;
-  
+  glm::vec3 minimum;
+  glm::vec3 maximum;
+
   GLuint bb_verts_VBO;
-  GLuint bb_edge_indices_VBO;
+  GLuint bb_tri_indices_VBO;
+  std::vector<VBOPosNormalColor> bb_verts;
+  std::vector<VBOIndexedTri> bb_tri_indices; // actually triangles
+
 };
 
 // ====================================================================
 // ====================================================================
 
 #endif
-

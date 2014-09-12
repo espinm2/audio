@@ -4,11 +4,35 @@
 #include <cassert>
 #include <string>
 
-#include "vectors.h"
+#include <glm/glm.hpp>
+
 #include "MersenneTwister.h"
 
 // ================================================================================
 // ================================================================================
+
+inline void separatePathAndFile(const std::string &input, std::string &path, std::string &file) {
+  // we need to separate the filename from the path
+  // (we assume the vertex & fragment shaders are in the same directory)
+  // first, locate the last '/' in the filename
+  size_t last = std::string::npos;  
+  while (1) {
+    int next = input.find('/',last+1);
+    if (next == std::string::npos) { break;
+    }
+    last = next;
+  }
+  if (last == std::string::npos) {
+    // if there is no directory in the filename
+    file = input;
+    path = ".";
+  } else {
+    // separate filename & path
+    file = input.substr(last+1,input.size()-last-1);
+    path = input.substr(0,last);
+  }
+}
+
 
 class ArgParser {
 
@@ -22,10 +46,10 @@ public:
     for (int i = 1; i < argc; i++) {
       if (argv[i] == std::string("-cloth")) {
         i++; assert (i < argc); 
-        cloth_file = argv[i];
+        separatePathAndFile(argv[i],path,cloth_file);
       } else if (argv[i] == std::string("-fluid")) {
-        i++; assert (i < argc); 
-        fluid_file = argv[i];
+	i++; assert (i < argc); 	
+        separatePathAndFile(argv[i],path,fluid_file);
       } else if (argv[i] == std::string("-size")) {
         i++; assert (i < argc); 
 	width = height = atoi(argv[i]);
@@ -65,7 +89,7 @@ public:
     cubes = false;
     pressure = false;
 
-    gravity = Vec3f(0,-9.8,0);
+    gravity = glm::vec3(0,-9.8,0);
 
     // uncomment for deterministic randomness
     // mtrand = MTRand(37);
@@ -79,13 +103,14 @@ public:
 
   std::string cloth_file;
   std::string fluid_file;
+  std::string path;
   int width;
   int height;
 
   // animation control
   double timestep;
   bool animate;
-  Vec3f gravity;
+  glm::vec3 gravity;
 
   // display option toggles 
   // (used by both)

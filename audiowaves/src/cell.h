@@ -9,12 +9,12 @@
 class FluidParticle {
 public:
   // accessor
-  Vec3f getPosition() const { return position; }
+  const glm::vec3& getPosition() const { return position; }
   // modifer
-  void setPosition(Vec3f p) { position = p; }
+  void setPosition(const glm::vec3 &p) { position = p; }
 private:
   // representation
-  Vec3f position;
+  glm::vec3 position;
 };
 
 // ==============================================================================

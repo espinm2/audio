@@ -1,36 +1,23 @@
 #ifndef _GL_CANVAS_H_
 #define _GL_CANVAS_H_
 
+// Graphics Library Includes
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cassert>
 #include <string>
 
-// Included files for OpenGL Rendering
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#include <GLUT/glut.h>
-#else
-#define GL_GLEXT_PROTOTYPES
-#ifdef _WIN32
-#define GLUT_DISABLE_ATEXIT_HACK
-#include <GL/glew.h>
-#endif
-#include <GL/glut.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#ifdef _WIN32
-#include "GL/wglew.h"
-#endif
-#endif
-
 #include "boundingbox.h"
 
 class ArgParser;
-class Camera;
 class Cloth;
 class Fluid;
+class Camera;
 
 // ====================================================================
 // NOTE:  All the methods and variables of this class are static
@@ -40,43 +27,58 @@ class GLCanvas {
 
 public:
 
-  // Set up the canvas and enter the rendering loop
-  // Note that this function will not return but can be
-  // terminated by calling 'exit(0)'
-  static void initialize(ArgParser *_args);
-  static void Render();
-
-private:
-
-  static void InitLight();
-  static void Load();
-
   // various static variables
   static ArgParser *args;
-  static Camera *camera;
-  static Cloth *cloth;
-  static Fluid *fluid;
+  static Cloth* cloth;
+  static Fluid* fluid;
   static BoundingBox bbox;
+  static Camera* camera;
+  static GLFWwindow* window;
 
-  // state of the mouse cursor
-  static int mouseButton;
+  static GLuint ViewMatrixID;
+  static GLuint ModelMatrixID;
+  static GLuint LightID;
+  static GLuint MatrixID;
+  static GLuint programID;
+  static GLuint colormodeID;
+  static GLuint wireframeID;
+  
+  // mouse position
   static int mouseX;
   static int mouseY;
-  static bool shiftPressed;
-  static bool controlPressed;
-  static bool altPressed;
+  // which mouse button
+  static bool leftMousePressed;
+  static bool middleMousePressed;
+  static bool rightMousePressed;
+  // current state of modifier keys
+  static bool shiftKeyPressed;
+  static bool controlKeyPressed;
+  static bool altKeyPressed;
+  static bool superKeyPressed;
+
+  static GLuint simulation_VAO;
+
+  static void initialize(ArgParser *_args);
+  static void Load();
+  static void initializeVBOs();
+  static void setupVBOs();
+  static void drawVBOs(const glm::mat4 &ProjectionMatrix,const glm::mat4 &ViewMatrix,const glm::mat4 &ModelMatrix);
+  static void cleanupVBOs();
+
+  static void animate();
 
   // Callback functions for mouse and keyboard events
-  static void display(void);
-  static void reshape(int w, int h);
-  static void mouse(int button, int state, int x, int y);
-  static void motion(int x, int y);
-  static void keyboard(unsigned char key, int x, int y);
-  static void idle();
+  static void mousebuttonCB(GLFWwindow *window, int which_button, int action, int mods);
+  static void mousemotionCB(GLFWwindow *window, double x, double y);
+  static void keyboardCB(GLFWwindow *window, int key, int scancode, int action, int mods);
+  static void error_callback(int error, const char* description);
 };
 
 // ====================================================================
 
-int HandleGLError(const std::string &message = "");
+// helper functions
+GLuint LoadShaders(const std::string &vertex_file_path,const std::string &fragment_file_path);
+std::string WhichGLError(GLenum &error);
+int HandleGLError(const std::string &message = "", bool ignore = false);
 
 #endif

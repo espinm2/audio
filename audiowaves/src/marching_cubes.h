@@ -2,7 +2,6 @@
 #define _MARCHING_CUBES_
 
 #include <vector>
-#include "vectors.h"
 #include "vbo_structs.h"
 
 // ==================================================================================
@@ -11,9 +10,9 @@
 class GridValue {
 public:
   GridValue() {}
-  GridValue(const Vec3f &p, const Vec3f &n, double v) : position(p), normal(n), value(v) { } 
-  Vec3f position;
-  Vec3f normal;
+  GridValue(const glm::vec3 &p, const glm::vec3 &n, double v) : position(p), normal(n), value(v) { } 
+  glm::vec3 position;
+  glm::vec3 normal;
   double value;
 };
 
@@ -37,7 +36,7 @@ public:
     return values[z*nx*ny + y*nx + x];
   }
   // normal
-  Vec3f getNormal(int x, int y, int z) const {
+  glm::vec3 getNormal(int x, int y, int z) const {
     assert (x >= 0 && x < nx);
     assert (y >= 0 && y < ny);
     assert (z >= 0 && z < nz);
@@ -53,8 +52,8 @@ public:
     if (z == 0)         dz = get(x,y,z+1)-get(x,y,z  );
     else if (z == nz-1) dz = get(x,y,z  )-get(x,y,z-1);
     else                dz = get(x,y,z+1)-get(x,y,z-1);
-    Vec3f norm(-dx,-dy,-dz);
-    norm.Normalize();
+    glm::vec3 norm(-dx,-dy,-dz);
+    norm = glm::normalize(norm);
     return norm;
   }
   void set(int x, int y, int z, double v) const {
@@ -79,10 +78,10 @@ private:
   void PaintTetraHelper3(const GridValue &a, const GridValue &b, const GridValue &c, const GridValue &d, double isosurface);
   void PaintTetraHelper2(const GridValue &a, const GridValue &b, const GridValue &c, const GridValue &d, double isosurface); 
   void PaintTetraHelper1(const GridValue &a, const GridValue &b, const GridValue &c, const GridValue &d, double isosurface); 
-  void drawIfBoundary(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3);
-  void drawTriangleWithNormals(const Vec3f &n1, const Vec3f &p1, 
-			       const Vec3f &n2, const Vec3f &p2, 
-			       const Vec3f &n3, const Vec3f &p3);
+  void drawIfBoundary(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3);
+  void drawTriangleWithNormals(const glm::vec3 &n1, const glm::vec3 &p1, 
+			       const glm::vec3 &n2, const glm::vec3 &p2, 
+			       const glm::vec3 &n3, const glm::vec3 &p3);
 
   // ==============
   // REPRESENTATION
@@ -92,7 +91,8 @@ private:
   
   GLuint marching_cubes_verts_VBO;
   GLuint marching_cubes_tri_indices_VBO;
-  std::vector<VBOPosNormal> marching_cubes_verts;
+
+  std::vector<VBOPosNormalColor> marching_cubes_verts;
   std::vector<VBOIndexedTri> marching_cubes_tri_indices;
 };
 

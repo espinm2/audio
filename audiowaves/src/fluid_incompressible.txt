@@ -1,0 +1,20 @@
+grid 8 8 1
+cell_dimensions 1 1 1
+
+flow incompressible
+xy_boundary free_slip
+yz_boundary free_slip
+zx_boundary free_slip
+viscosity 0.1
+gravity 0
+
+initial_particles everywhere random
+density 64
+
+initial_velocity zero
+
+u 3 3 0 50
+u 3 4 0 -50
+v 3 3 0 -50
+v 4 3 0 50
+

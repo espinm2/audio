@@ -21,14 +21,14 @@ void MarchingCubes::setupVBOs() {
       for (int k = 0; k < nz-1; k++) {
 	GridValue v[8];
 	double eps = 0;//dx * 0.05;
-	v[0] = GridValue(Vec3f(dx*i    +eps,dy*j    +eps,dz*k    +eps),getNormal(i  ,j  ,k  ),get(i  ,j  ,k  ));
-	v[1] = GridValue(Vec3f(dx*i    +eps,dy*j    +eps,dz*(k+1)-eps),getNormal(i  ,j  ,k+1),get(i  ,j  ,k+1));
-	v[2] = GridValue(Vec3f(dx*i    +eps,dy*(j+1)-eps,dz*k    +eps),getNormal(i  ,j+1,k  ),get(i  ,j+1,k  ));
-	v[3] = GridValue(Vec3f(dx*i    +eps,dy*(j+1)-eps,dz*(k+1)-eps),getNormal(i  ,j+1,k+1),get(i  ,j+1,k+1));
-	v[4] = GridValue(Vec3f(dx*(i+1)-eps,dy*j    +eps,dz*k    +eps),getNormal(i+1,j  ,k  ),get(i+1,j  ,k  ));
-	v[5] = GridValue(Vec3f(dx*(i+1)-eps,dy*j    +eps,dz*(k+1)-eps),getNormal(i+1,j  ,k+1),get(i+1,j  ,k+1));
-	v[6] = GridValue(Vec3f(dx*(i+1)-eps,dy*(j+1)-eps,dz*k    +eps),getNormal(i+1,j+1,k  ),get(i+1,j+1,k  ));
-	v[7] = GridValue(Vec3f(dx*(i+1)-eps,dy*(j+1)-eps,dz*(k+1)-eps),getNormal(i+1,j+1,k+1),get(i+1,j+1,k+1));
+	v[0] = GridValue(glm::vec3(dx*i    +eps,dy*j    +eps,dz*k    +eps),getNormal(i  ,j  ,k  ),get(i  ,j  ,k  ));
+	v[1] = GridValue(glm::vec3(dx*i    +eps,dy*j    +eps,dz*(k+1)-eps),getNormal(i  ,j  ,k+1),get(i  ,j  ,k+1));
+	v[2] = GridValue(glm::vec3(dx*i    +eps,dy*(j+1)-eps,dz*k    +eps),getNormal(i  ,j+1,k  ),get(i  ,j+1,k  ));
+	v[3] = GridValue(glm::vec3(dx*i    +eps,dy*(j+1)-eps,dz*(k+1)-eps),getNormal(i  ,j+1,k+1),get(i  ,j+1,k+1));
+	v[4] = GridValue(glm::vec3(dx*(i+1)-eps,dy*j    +eps,dz*k    +eps),getNormal(i+1,j  ,k  ),get(i+1,j  ,k  ));
+	v[5] = GridValue(glm::vec3(dx*(i+1)-eps,dy*j    +eps,dz*(k+1)-eps),getNormal(i+1,j  ,k+1),get(i+1,j  ,k+1));
+	v[6] = GridValue(glm::vec3(dx*(i+1)-eps,dy*(j+1)-eps,dz*k    +eps),getNormal(i+1,j+1,k  ),get(i+1,j+1,k  ));
+	v[7] = GridValue(glm::vec3(dx*(i+1)-eps,dy*(j+1)-eps,dz*(k+1)-eps),getNormal(i+1,j+1,k+1),get(i+1,j+1,k+1));
 	// need to alternate orientation of central tetrahedron to ensure that the diagonals line up
 	if ((i+j+k)%2) {
 	  PaintTetra(v[0],v[5],v[3],v[6],isosurface);
@@ -47,49 +47,37 @@ void MarchingCubes::setupVBOs() {
     }
   }
 
-  // cleanup old buffer data (if any)
-  cleanupVBOs();
-
   // copy the data to each VBO
-  int num_marching_cubes_tris = marching_cubes_tri_indices.size();
   glBindBuffer(GL_ARRAY_BUFFER,marching_cubes_verts_VBO); 
-  glBufferData(GL_ARRAY_BUFFER,sizeof(VBOPosNormal)*num_marching_cubes_tris*3,&marching_cubes_verts[0],GL_STATIC_DRAW); 
+  glBufferData(GL_ARRAY_BUFFER,sizeof(VBOPosNormalColor)*marching_cubes_verts.size(),&marching_cubes_verts[0],GL_STATIC_DRAW); 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,marching_cubes_tri_indices_VBO); 
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(VBOIndexedTri)*num_marching_cubes_tris,&marching_cubes_tri_indices[0],GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(VBOIndexedTri)*marching_cubes_tri_indices.size(),&marching_cubes_tri_indices[0],GL_STATIC_DRAW);
 }
 
 
 void MarchingCubes::drawVBOs() {
-  glEnable(GL_LIGHTING);
-  //  glDisable(GL_CULL_FACE);
-  //  glEnable (GL_BLEND);
-  // glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  //  glColor4f(0,0,1,0.5);//0.5);
-  
-  glColor3f(0,0,1);
-  glBindBuffer(GL_ARRAY_BUFFER, marching_cubes_verts_VBO);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, sizeof(VBOPosNormal), BUFFER_OFFSET(0));
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glNormalPointer(GL_FLOAT, sizeof(VBOPosNormal), BUFFER_OFFSET(12));
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, marching_cubes_tri_indices_VBO);
-  int num_marching_cubes_tris = marching_cubes_tri_indices.size();
-  glDrawElements(GL_TRIANGLES,num_marching_cubes_tris*3,GL_UNSIGNED_INT,BUFFER_OFFSET(0));
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_VERTEX_ARRAY);
-
-  //  glEnable(GL_DEPTH_TEST);  
-  //  glDisable(GL_CULL_FACE);
-  //glDisable(GL_BLEND);
-  glDisable(GL_LIGHTING);
-
+  glUniform1i(GLCanvas::colormodeID, 1);
+  glBindBuffer(GL_ARRAY_BUFFER,marching_cubes_verts_VBO); 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,marching_cubes_tri_indices_VBO); 
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(glm::vec3),(void*)0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,3*sizeof(glm::vec3),(void*)sizeof(glm::vec3) );
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 3, GL_FLOAT,GL_FALSE,3*sizeof(glm::vec3), (void*)(sizeof(glm::vec3)*2));
+  glDrawElements(GL_TRIANGLES,
+                 marching_cubes_tri_indices.size()*3,
+                 GL_UNSIGNED_INT, BUFFER_OFFSET(0));
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(2);
 }
+
 
 void MarchingCubes::cleanupVBOs() {
   glDeleteBuffers(1, &marching_cubes_verts_VBO);
   glDeleteBuffers(1, &marching_cubes_tri_indices_VBO);
 }
-
 
 
 // ============================================================================
@@ -143,18 +131,18 @@ void MarchingCubes::PaintTetraHelper4(const GridValue &a, const GridValue &b, co
 // when 3 vertices are within the volume
 void MarchingCubes::PaintTetraHelper3(const GridValue &a, const GridValue &b, const GridValue &c, const GridValue &d, double isosurface)  {
   assert (a.value > isosurface && b.value > isosurface && c.value > isosurface && d.value <= isosurface);
-  double ad_frac = (isosurface - d.value) / (a.value - d.value);
+  float ad_frac = (isosurface - d.value) / (a.value - d.value);
   assert (ad_frac >= 0 && ad_frac <= 1);
-  double bd_frac = (isosurface - d.value) / (b.value - d.value);
+  float bd_frac = (isosurface - d.value) / (b.value - d.value);
   assert (bd_frac >= 0 && bd_frac <= 1);
-  double cd_frac = (isosurface - d.value) / (c.value - d.value);
+  float cd_frac = (isosurface - d.value) / (c.value - d.value);
   assert (cd_frac >= 0 && cd_frac <= 1);
-  Vec3f ad = ad_frac*a.position + (1-ad_frac)*d.position;
-  Vec3f bd = bd_frac*b.position + (1-bd_frac)*d.position;
-  Vec3f cd = cd_frac*c.position + (1-cd_frac)*d.position;
-  Vec3f ad_norm = ad_frac*a.normal + (1-ad_frac)*d.normal;
-  Vec3f bd_norm = bd_frac*b.normal + (1-bd_frac)*d.normal;
-  Vec3f cd_norm = cd_frac*c.normal + (1-cd_frac)*d.normal;
+  glm::vec3 ad = ad_frac*a.position + (1-ad_frac)*d.position;
+  glm::vec3 bd = bd_frac*b.position + (1-bd_frac)*d.position;
+  glm::vec3 cd = cd_frac*c.position + (1-cd_frac)*d.position;
+  glm::vec3 ad_norm = ad_frac*a.normal + (1-ad_frac)*d.normal;
+  glm::vec3 bd_norm = bd_frac*b.normal + (1-bd_frac)*d.normal;
+  glm::vec3 cd_norm = cd_frac*c.normal + (1-cd_frac)*d.normal;
   drawTriangleWithNormals(ad_norm,ad,cd_norm,cd,bd_norm,bd);
   drawIfBoundary(a.position,ad,bd);
   drawIfBoundary(a.position,bd,b.position);
@@ -168,22 +156,22 @@ void MarchingCubes::PaintTetraHelper3(const GridValue &a, const GridValue &b, co
 // when 2 vertices are within the volume
 void MarchingCubes::PaintTetraHelper2(const GridValue &a, const GridValue &b, const GridValue &c, const GridValue &d, double isosurface)  {
   assert (a.value > isosurface && b.value > isosurface && c.value <= isosurface && d.value <= isosurface);
-  double ac_frac = (isosurface - c.value) / (a.value - c.value);
+  float ac_frac = (isosurface - c.value) / (a.value - c.value);
   assert (ac_frac >= 0 && ac_frac <= 1);
-  double ad_frac = (isosurface - d.value) / (a.value - d.value);
+  float ad_frac = (isosurface - d.value) / (a.value - d.value);
   assert (ad_frac >= 0 && ad_frac <= 1);
-  double bc_frac = (isosurface - c.value) / (b.value - c.value);
+  float bc_frac = (isosurface - c.value) / (b.value - c.value);
   assert (bc_frac >= 0 && bc_frac <= 1);
-  double bd_frac = (isosurface - d.value) / (b.value - d.value);
+  float bd_frac = (isosurface - d.value) / (b.value - d.value);
   assert (bd_frac >= 0 && bd_frac <= 1);
-  Vec3f ac = ac_frac*a.position + (1-ac_frac)*c.position;
-  Vec3f ad = ad_frac*a.position + (1-ad_frac)*d.position;
-  Vec3f bc = bc_frac*b.position + (1-bc_frac)*c.position;
-  Vec3f bd = bd_frac*b.position + (1-bd_frac)*d.position;
-  Vec3f ac_norm = ac_frac*a.normal + (1-ac_frac)*c.normal;
-  Vec3f ad_norm = ad_frac*a.normal + (1-ad_frac)*d.normal;
-  Vec3f bc_norm = bc_frac*b.normal + (1-bc_frac)*c.normal;
-  Vec3f bd_norm = bd_frac*b.normal + (1-bd_frac)*d.normal;
+  glm::vec3 ac = ac_frac*a.position + (1-ac_frac)*c.position;
+  glm::vec3 ad = ad_frac*a.position + (1-ad_frac)*d.position;
+  glm::vec3 bc = bc_frac*b.position + (1-bc_frac)*c.position;
+  glm::vec3 bd = bd_frac*b.position + (1-bd_frac)*d.position;
+  glm::vec3 ac_norm = ac_frac*a.normal + (1-ac_frac)*c.normal;
+  glm::vec3 ad_norm = ad_frac*a.normal + (1-ad_frac)*d.normal;
+  glm::vec3 bc_norm = bc_frac*b.normal + (1-bc_frac)*c.normal;
+  glm::vec3 bd_norm = bd_frac*b.normal + (1-bd_frac)*d.normal;
   drawTriangleWithNormals(ac_norm,ac,bc_norm,bc,ad_norm,ad);
   drawTriangleWithNormals(bc_norm,bc,bd_norm,bd,ad_norm,ad);
   drawIfBoundary(a.position,ac,ad);
@@ -197,18 +185,18 @@ void MarchingCubes::PaintTetraHelper2(const GridValue &a, const GridValue &b, co
 // when 1 vertex is within the volume
 void MarchingCubes::PaintTetraHelper1(const GridValue &a, const GridValue &b, const GridValue &c, const GridValue &d, double isosurface)  {
   assert (a.value > isosurface && b.value <= isosurface && c.value <= isosurface && d.value <= isosurface);
-  double ab_frac = (isosurface - b.value) / (a.value - b.value);
+  float ab_frac = (isosurface - b.value) / (a.value - b.value);
   assert (ab_frac >= 0 && ab_frac <= 1);
-  double ac_frac = (isosurface - c.value) / (a.value - c.value);
+  float ac_frac = (isosurface - c.value) / (a.value - c.value);
   assert (ac_frac >= 0 && ac_frac <= 1);
-  double ad_frac = (isosurface - d.value) / (a.value - d.value);
+  float ad_frac = (isosurface - d.value) / (a.value - d.value);
   assert (ad_frac >= 0 && ad_frac <= 1);
-  Vec3f ab = ab_frac*a.position + (1-ab_frac)*b.position;
-  Vec3f ac = ac_frac*a.position + (1-ac_frac)*c.position;
-  Vec3f ad = ad_frac*a.position + (1-ad_frac)*d.position;
-  Vec3f ab_norm = ab_frac*a.normal + (1-ab_frac)*b.normal;
-  Vec3f ac_norm = ac_frac*a.normal + (1-ac_frac)*c.normal;
-  Vec3f ad_norm = ad_frac*a.normal + (1-ad_frac)*d.normal;
+  glm::vec3 ab = ab_frac*a.position + (1-ab_frac)*b.position;
+  glm::vec3 ac = ac_frac*a.position + (1-ac_frac)*c.position;
+  glm::vec3 ad = ad_frac*a.position + (1-ad_frac)*d.position;
+  glm::vec3 ab_norm = ab_frac*a.normal + (1-ab_frac)*b.normal;
+  glm::vec3 ac_norm = ac_frac*a.normal + (1-ac_frac)*c.normal;
+  glm::vec3 ad_norm = ad_frac*a.normal + (1-ad_frac)*d.normal;
   drawTriangleWithNormals(ab_norm,ab,ad_norm,ad,ac_norm,ac);
   drawIfBoundary(a.position,ab,ac);
   drawIfBoundary(a.position,ac,ad);
@@ -217,26 +205,27 @@ void MarchingCubes::PaintTetraHelper1(const GridValue &a, const GridValue &b, co
 
 // ============================================================================
 
-void MarchingCubes::drawTriangleWithNormals(const Vec3f &n1, const Vec3f &p1, 
-					    const Vec3f &n2, const Vec3f &p2, 
-					    const Vec3f &n3, const Vec3f &p3) {
+void MarchingCubes::drawTriangleWithNormals(const glm::vec3 &n1, const glm::vec3 &p1, 
+					    const glm::vec3 &n2, const glm::vec3 &p2, 
+					    const glm::vec3 &n3, const glm::vec3 &p3) {
   int num_marching_cubes_tris = marching_cubes_tri_indices.size();
-  marching_cubes_verts.push_back(VBOPosNormal(p1,n1));
-  marching_cubes_verts.push_back(VBOPosNormal(p2,n2));
-  marching_cubes_verts.push_back(VBOPosNormal(p3,n3));
+  glm::vec3 color(0,0,1);
+  marching_cubes_verts.push_back(VBOPosNormalColor(p1,n1,color));
+  marching_cubes_verts.push_back(VBOPosNormalColor(p2,n2,color));
+  marching_cubes_verts.push_back(VBOPosNormalColor(p3,n3,color));
   marching_cubes_tri_indices.push_back(VBOIndexedTri(num_marching_cubes_tris*3+0,
 						     num_marching_cubes_tris*3+1,
 						     num_marching_cubes_tris*3+2));
 }
 
-void MarchingCubes::drawIfBoundary(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3) {
-  if ((p1.x() <= 0.1*dx && p2.x() <= 0.1*dx && p3.x() <= 0.1*dx) ||
-      (p1.y() <= 0.1*dy && p2.y() <= 0.1*dy && p3.y() <= 0.1*dy) ||
-      (p1.z() <= 0.1*dz && p2.z() <= 0.1*dz && p3.z() <= 0.1*dz) ||
-      (p1.x() >= dx*(nx-1.1) && p2.x() >= dx*(nx-1.1) && p3.x() >= dx*(nx-1.1)) ||
-      (p1.y() >= dy*(ny-1.1) && p2.y() >= dy*(ny-1.1) && p3.y() >= dy*(ny-1.1)) ||
-      (p1.z() >= dz*(nz-1.1) && p2.z() >= dz*(nz-1.1) && p3.z() >= dz*(nz-1.1))) {
-    Vec3f normal = computeNormal(p1,p2,p3);
+void MarchingCubes::drawIfBoundary(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3) {
+  if ((p1.x <= 0.1*dx && p2.x <= 0.1*dx && p3.x <= 0.1*dx) ||
+      (p1.y <= 0.1*dy && p2.y <= 0.1*dy && p3.y <= 0.1*dy) ||
+      (p1.z <= 0.1*dz && p2.z <= 0.1*dz && p3.z <= 0.1*dz) ||
+      (p1.x >= dx*(nx-1.1) && p2.x >= dx*(nx-1.1) && p3.x >= dx*(nx-1.1)) ||
+      (p1.y >= dy*(ny-1.1) && p2.y >= dy*(ny-1.1) && p3.y >= dy*(ny-1.1)) ||
+      (p1.z >= dz*(nz-1.1) && p2.z >= dz*(nz-1.1) && p3.z >= dz*(nz-1.1))) {
+    glm::vec3 normal = computeNormal(p1,p2,p3);
     drawTriangleWithNormals(normal,p1,normal,p2,normal,p3);
   }
 }

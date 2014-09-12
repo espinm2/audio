@@ -1,75 +1,94 @@
+#include <iostream>
 #include "glCanvas.h"
 #include "boundingbox.h"
-#include "utils.h"
 #include "vbo_structs.h"
+#include "utils.h"
 
 // ====================================================================
 // ====================================================================
 
 void BoundingBox::initializeVBOs() {
   glGenBuffers(1, &bb_verts_VBO);
-  glGenBuffers(1, &bb_edge_indices_VBO);
+  glGenBuffers(1, &bb_tri_indices_VBO);
 }
+
 
 void BoundingBox::setupVBOs() {
 
   HandleGLError("setup VBOs a ");
 
-  VBOPos bb_verts[8];
-  VBOIndexedEdge bb_edges[12];
-  
-  bb_verts[0] = VBOPos(Vec3f(minimum.x(),minimum.y(),minimum.z()));
-  bb_verts[1] = VBOPos(Vec3f(minimum.x(),minimum.y(),maximum.z()));
-  bb_verts[2] = VBOPos(Vec3f(minimum.x(),maximum.y(),minimum.z()));
-  bb_verts[3] = VBOPos(Vec3f(minimum.x(),maximum.y(),maximum.z()));
-  bb_verts[4] = VBOPos(Vec3f(maximum.x(),minimum.y(),minimum.z()));
-  bb_verts[5] = VBOPos(Vec3f(maximum.x(),minimum.y(),maximum.z()));
-  bb_verts[6] = VBOPos(Vec3f(maximum.x(),maximum.y(),minimum.z()));
-  bb_verts[7] = VBOPos(Vec3f(maximum.x(),maximum.y(),maximum.z()));
+  float thickness = 0.001*glm::length(maximum-minimum);
 
-  bb_edges[ 0] = VBOIndexedEdge(0,1);
-  bb_edges[ 1] = VBOIndexedEdge(1,3);
-  bb_edges[ 2] = VBOIndexedEdge(3,2);
-  bb_edges[ 3] = VBOIndexedEdge(2,0);
-  bb_edges[ 4] = VBOIndexedEdge(0,4);
-  bb_edges[ 5] = VBOIndexedEdge(1,5);
-  bb_edges[ 6] = VBOIndexedEdge(2,6);
-  bb_edges[ 7] = VBOIndexedEdge(3,7);
-  bb_edges[ 8] = VBOIndexedEdge(4,5);
-  bb_edges[ 9] = VBOIndexedEdge(5,7);
-  bb_edges[10] = VBOIndexedEdge(7,6);
-  bb_edges[11] = VBOIndexedEdge(6,4);
-			 
-  HandleGLError("setup VBOs b ");
+  glm::vec3& A = minimum;
+  glm::vec3& B = maximum;
+
+  glm::vec3 black(0,0,0);
+
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,A.y,A.z),glm::vec3(A.x,A.y,B.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,A.y,B.z),glm::vec3(A.x,B.y,B.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,B.y,B.z),glm::vec3(A.x,B.y,A.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,B.y,A.z),glm::vec3(A.x,A.y,A.z),black,black,thickness,thickness);
+
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(B.x,A.y,A.z),glm::vec3(B.x,A.y,B.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(B.x,A.y,B.z),glm::vec3(B.x,B.y,B.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(B.x,B.y,B.z),glm::vec3(B.x,B.y,A.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(B.x,B.y,A.z),glm::vec3(B.x,A.y,A.z),black,black,thickness,thickness);
+  
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,A.y,A.z),glm::vec3(B.x,A.y,A.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,A.y,B.z),glm::vec3(B.x,A.y,B.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,B.y,B.z),glm::vec3(B.x,B.y,B.z),black,black,thickness,thickness);
+  addEdgeGeometry(bb_verts,bb_tri_indices,glm::vec3(A.x,B.y,A.z),glm::vec3(B.x,B.y,A.z),black,black,thickness,thickness);
+
   glBindBuffer(GL_ARRAY_BUFFER,bb_verts_VBO); 
-  HandleGLError("setup VBOs c ");
-  glBufferData(GL_ARRAY_BUFFER,sizeof(VBOPos)*8,bb_verts,GL_STATIC_DRAW); 
-  HandleGLError("setup VBOs d ");
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,bb_edge_indices_VBO);
-  HandleGLError("setup VBOs e ");
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(VBOIndexedEdge)*12,bb_edges,GL_STATIC_DRAW);
-  HandleGLError("setup VBOs bf ");
+  glBufferData(GL_ARRAY_BUFFER,sizeof(VBOPosNormalColor)*bb_verts.size(),&bb_verts[0],GL_STATIC_DRAW); 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,bb_tri_indices_VBO); 
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(VBOIndexedTri)*bb_tri_indices.size(),&bb_tri_indices[0],GL_STATIC_DRAW);
 }
 
 void BoundingBox::drawVBOs() {
   HandleGLError("draw VBOs a ");
-
   glBindBuffer(GL_ARRAY_BUFFER, bb_verts_VBO);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, sizeof(VBOPos), BUFFER_OFFSET(0));
-  glLineWidth(1);
-  glColor3f(0,0,0);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bb_edge_indices_VBO);
-  HandleGLError("draw VBOs b ");
-  glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
-  HandleGLError("draw VBOS c");
-  glDisableClientState(GL_VERTEX_ARRAY);
+
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0,                  // attribute
+                        3,                  // size
+                        GL_FLOAT,           // type
+                        GL_FALSE,           // normalized?
+                        3*sizeof(glm::vec3),// stride
+                        (void*)0            // array buffer offset
+                        );
+  // triangle vertex normals
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1,                      // attribute
+                        3,                      // size
+                        GL_FLOAT,               // type
+                        GL_FALSE,               // normalized?
+                        3*sizeof(glm::vec3),    // stride
+                        (void*)sizeof(glm::vec3)// array buffer offset
+                        );
+  // triangle vertex colors
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2,                          // attribute
+                        3,                          // size
+                        GL_FLOAT,                   // type
+                        GL_FALSE,                   // normalized?
+                        3*sizeof(glm::vec3),        // stride
+                        (void*)(sizeof(glm::vec3)*2)// array buffer offset
+                        );
+  // triangle indices
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bb_tri_indices_VBO);
+  glDrawElements(GL_TRIANGLES,
+                 bb_tri_indices.size()*3,
+                 GL_UNSIGNED_INT, BUFFER_OFFSET(0));
   
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  glDisableVertexAttribArray(2);
 }
 
 void BoundingBox::cleanupVBOs() {
   glDeleteBuffers(1, &bb_verts_VBO);
-  glDeleteBuffers(1, &bb_edge_indices_VBO);
+  glDeleteBuffers(1, &bb_tri_indices_VBO);
 }
 
 

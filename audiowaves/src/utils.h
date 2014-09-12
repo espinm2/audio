@@ -18,17 +18,15 @@
 #define my_min std::min
 #endif
 
-
 // ======================================================================
 
-inline Vec3f computeNormal(const Vec3f &p1, const Vec3f &p2, const Vec3f &p3) {
-  Vec3f v12 = p2;
+inline glm::vec3 computeNormal(const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3) {
+  glm::vec3 v12 = p2;
   v12 -= p1;
-  Vec3f v23 = p3;
+  glm::vec3 v23 = p3;
   v23 -= p2;
-  Vec3f normal;
-  Vec3f::Cross3(normal,v12,v23);
-  normal.Normalize();
+  glm::vec3 normal = glm::cross(v12,v23);
+  normal = glm::normalize(normal);
   return normal;
 }
 
@@ -65,9 +63,18 @@ inline double AreaOfTriangle(double a, double b, double c) {
 }
 
 
-inline double AreaOfTriangle(const Vec3f &a, const Vec3f &b, const Vec3f &c) {
-  return AreaOfTriangle((a-b).Length(), (b-c).Length(), (c-a).Length());
+inline double AreaOfTriangle(const glm::vec3 &a, const glm::vec3 &b, const glm::vec3 &c) {
+  return AreaOfTriangle(glm::length(a-b), glm::length(b-c), glm::length(c-a));
 }
+
+
+void addEdgeGeometry(std::vector<VBOPosNormalColor> &verts,
+                     std::vector<VBOIndexedTri> &tri_indices,
+                     const glm::vec3 &a, const glm::vec3 &b, 
+                     const glm::vec3 &acolor, const glm::vec3 &bcolor, 
+                     float a_th,float b_th);
+
+
 
 // ======================================================================
 

@@ -1,0 +1,21 @@
+k_structural 1
+k_shear 1
+k_bend 1
+damping 0.05
+
+provot_structural_correction 100
+provot_shear_correction 100
+
+m 3 3
+
+p 0 0.5 0
+p 0.5 0.5 0 
+p 0.5 0 0
+p 0 0 0
+
+
+fabric_weight 0.1
+
+f 0 0    0 0.5 0.1
+
+

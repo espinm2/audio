@@ -1,7 +1,7 @@
-Foster grid 8 8 1
+grid 8 8 1
 cell_dimensions 1 1 1
 
-flow incompressible
+flow compressible
 xy_boundary free_slip
 yz_boundary free_slip
 zx_boundary free_slip
@@ -13,8 +13,12 @@ density 64
 
 initial_velocity zero
 
-u 3 3 0 50
-u 3 4 0 -50
-v 3 3 0 -50
-v 4 3 0 50
+u 3 3 0 10
+u 3 4 0 -10
+v 3 3 0 -10
+v 4 3 0 10
 
+u 3 2 0 10
+u 3 5 0 -10
+v 2 3 0 -10
+v 5 3 0 10

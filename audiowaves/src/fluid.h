@@ -5,7 +5,6 @@
 #include <vector>
 #include "argparser.h"
 #include "boundingbox.h"
-#include "vectors.h"
 #include "cell.h"
 #include "vbo_structs.h"
 
@@ -23,18 +22,19 @@ public:
   // CONSTRUCTOR & DESTRUCTOR
   Fluid(ArgParser *_args);
   ~Fluid();
-  void Load();
 
-  void initializeVBOs(); 
-  void setupVBOs(); 
-  void drawVBOs();
-  void cleanupVBOs();
+  // load data
+  void Load();
 
   // ===============================
   // ANIMATION & RENDERING FUNCTIONS
   void Animate();
+  void initializeVBOs(); 
+  void setupVBOs(); 
+  void drawVBOs();
+  void cleanupVBOs();
   BoundingBox getBoundingBox() const {
-    return BoundingBox(Vec3f(0,0,0),Vec3f(nx*dx,ny*dy,nz*dz)); }
+    return BoundingBox(glm::vec3(0,0,0),glm::vec3(nx*dx,ny*dy,nz*dz)); }
 
 private:
 
@@ -55,7 +55,6 @@ private:
   void EmptyVelocities(int i, int j, int k);
   void CopyVelocities();
   double AdjustForIncompressibility();
-  double AdjustForIncompressibility_Foster();
   void UpdatePressures();
   void MoveParticles();
   void ReassignParticles();
@@ -63,7 +62,7 @@ private:
 
   // =====================
   // NAVIER-STOKES HELPERS
-  Vec3f getInterpolatedVelocity(const Vec3f &pos) const;
+  glm::vec3 getInterpolatedVelocity(const glm::vec3 &pos) const;
   double getPressure(int i, int j, int k) const { return getCell(i,j,k)->getPressure(); }
   // velocity accessors
   double get_u_plus(int i, int j, int k) const { return getCell(i,j,k)->get_u_plus(); }
@@ -91,43 +90,13 @@ private:
 
   // ========================================
   // RENDERING SURFACE (using Marching Cubes)
-  double interpolateIsovalue(const Vec3f &c) const;
+  double interpolateIsovalue(const glm::vec3 &c) const;
   double getIsovalue(int i, int j, int k) const;
 
   // ============
   // LOAD HELPERS
-  bool inShape(Vec3f &pos, const std::string &shape);
+  bool inShape(glm::vec3 &pos, const std::string &shape);
   void GenerateParticles(const std::string &shape, const std::string &placement);
-
-private:
-
-  // HELPER FUNCTIONS:
-  double IncompressibleFullCell(int i, int j, int k);
-  void CompressibleSurfaceCell(int i, int j, int k);
-  double getAreaSquares(const Vec3f& a, Vec3f&b) const ;
-
-  bool legal_full_cell(int i, int j, int k){
-    // Are you a boundry?
-    if (i >= 0 && i < nx && j >= 0 && j < ny && k >= 0 && k < nz){
-      // Are you full?
-      if(getCell(i,j,k)->getStatus() == CELL_FULL){
-        return true;
-      }
-    }
-    return false;
-  }
-  unsigned int getLegalAdjCells(int i, int j, int k){
-    int count = 0;
-
-    if(legal_full_cell(i+1,j,k)) count++;
-    if(legal_full_cell(i-1,j,k)) count++;
-    if(legal_full_cell(i,j+1,k)) count++;
-    if(legal_full_cell(i,j-1,k)) count++;
-    if(legal_full_cell(i,j,k+1)) count++;
-    if(legal_full_cell(i,j,k-1)) count++;
-
-    return count;
-  }
 
   // don't use this constructor
   Fluid() { assert(0); }
@@ -146,28 +115,32 @@ private:
   bool yz_free_slip;
   bool zx_free_slip;
   bool compressible;
-  bool Foster;
   double viscosity;
   double density; // average # of particles initialized in each "Full" cell
 
-  MarchingCubes *marchingCubes;  // to display an isosurface 
-
   // VBOs
   GLuint fluid_particles_VBO;
-  GLuint fluid_velocity_vis_VBO;
-  GLuint fluid_face_velocity_vis_VBO;
+  GLuint fluid_velocity_verts_VBO;
+  GLuint fluid_velocity_tri_indices_VBO;
+  GLuint fluid_facevelocity_verts_VBO;
+  GLuint fluid_facevelocity_tri_indices_VBO;
   GLuint fluid_pressure_vis_VBO;
   GLuint fluid_cell_type_vis_VBO;
-  std::vector<VBOPos> fluid_particles;
-  std::vector<VBOPosColor> fluid_velocity_vis;
-  std::vector<VBOPosNormalColor> fluid_face_velocity_vis;
+
+  std::vector<VBOPosNormalColor> fluid_particles;
+  std::vector<VBOPosNormalColor> fluid_velocity_verts; 
+  std::vector<VBOIndexedTri> fluid_velocity_tri_indices;
+  std::vector<VBOPosNormalColor> fluid_facevelocity_verts; 
+  std::vector<VBOIndexedTri> fluid_facevelocity_tri_indices;
   std::vector<VBOPosNormalColor> fluid_pressure_vis;
   std::vector<VBOPosNormalColor> fluid_cell_type_vis;
+
+  // Helper class to display an isosurface 
+  MarchingCubes *marchingCubes; 
 };
 
 
-void setupCubeVBO(const Vec3f pts[8], const Vec3f &color, std::vector<VBOPosNormalColor> &faces);
-void setupConeVBO(const Vec3f pts[5], const Vec3f &color, std::vector<VBOPosNormalColor> &faces);
+void setupCubeVBO(const glm::vec3 pts[8], const glm::vec3 &color, std::vector<VBOPosNormalColor> &faces);
 
 // ========================================================================
 
