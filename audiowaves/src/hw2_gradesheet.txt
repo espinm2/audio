@@ -1,0 +1,96 @@
+Homework 2:  Cloth and Fluid Simulation
+
+Student Name: Max Espinoza
+Email: espinm2@rpi.edu
+
+
+TOTAL:  [ ?? / 20 ]
+** If code does not compile and run as submitted, total score multiplied by 0.5 **
+
+
+2 PROGRESS POSTS [ ?? / 5 ]                                                        
+Posted on LMS on the dates specified on the calendar.  Includes short
+description of status, and at least one image.  Reasonable progress
+has been made.
+[Comment: Done Fully]
+
+
+SPRING FORCE COMPUTATION & VISUALIZATION [ ?? / 1 ]                               
+structural, sheer, & bend/flexion springs and gravity
+  ./simulation -cloth small_cloth.txt -timestep 0.001
+[Comment: Done Fully]
+
+ANIMATION USING NUMERICAL INTEGRATION [ ?? / 2 ]                                   
+simulation matches the provot over-stretched cloth example
+  ./simulation -cloth provot_original.txt -timestep 0.001
+[Comment: Done Fully]
+
+
+ALTERNATE INTEGRATION SCHEMES [ ?? ]                        
+1 pt extra credit for trapezoid or midpoint integration 
+2 pts extra credit for runge-kutta integration
+2 pts extra credit for an implicit scheme
+[Comment: Not Attepted]
+
+
+INTERATIVE OVER-STRETCHED SPRING ADJUSTMENT [ ?? / 2 ]                             
+For both the structural & sheer springs.  Matches Provot results.
+  ./simulation -cloth provot_correct_structural.txt -timestep 0.001
+  ./simulation -cloth provot_correct_structural_and_shear.txt -timestep 0.001
+[Comment: Done Fully, lines appear in "blue" because visualization has an epsilon value, of which I am on the boarder of]
+
+
+VARIATIONS IN BEHAVIOR FOR DIFFERENT PARAMETERS [ ?? / 1 ]                        
+  ./simulation -cloth denim_curtain.txt -timestep 0.001
+  ./simulation -cloth silk_curtain.txt -timestep 0.001
+  ./simulation -cloth table_cloth.txt -timestep 0.005
+[Comment: table_cloth works, however I couldn't get noticable diffrence between other two]
+
+
+TIMESTEP HALVING FOR INSTABILITY [ ?? / 1 ]
+  ./simulation -cloth provot_original.txt -timestep 0.1
+[Comment: Done Fully]
+
+
+NEW CLOTH TEST SCENE [ ?? / 1 ]
+1 pt for required new scene.  1 additional point pt (extra credit) for
+a complex scene requiring changes to the scene parsing, etc.
+[Comment: Done Fully]
+
+
+COLLISION DETECTION [ ?? ]
+1-3 points extra credit for implementation of cloth collision detection
+[Comment: Nope]
+
+
+CORRECT VELOCITY INTERPOLATION IN xy PLANE  [ ?? / 3 ]
+  ./simulation -fluid fluid_random_xy.txt -timestep 0.01
+[Done Fully]
+
+
+CORRECT VELOCITY INTERPOLATION IN yz && xz PLANES  [ ?? ]
+2 points extra credit if it works correctly in 3D
+  ./simulation -fluid fluid_random_yz.txt -timestep 0.01
+  ./simulation -fluid fluid_random_zx.txt -timestep 0.01
+
+INCOMPRESSIBILITY OF FULL CELLS  [ ?? / 2 ]
+  ./simulation -fluid fluid_compressible.txt -timestep 0.01
+  ./simulation -fluid fluid_incompressible.txt -timestep 0.01
+[Done Fully]
+
+
+INCOMPRESSIBILITY OF SURFACE CELLS  [ ?? / 2 ]
+  ./simulation -fluid fluid_drop.txt -timestep 0.01
+  ./simulation -fluid fluid_dam.txt -timestep 0.01
+[Not Done]
+
+
+PLAUSIBLE RESULTS GENERATED FOR DROP & DAM EXAMPLES [ ?? ]
+1-2 points extra credit for a working fluid simulation
+(it's ok if these examples blow up after a short time)
+[Not done]
+
+
+OTHER EXTRA CREDIT [ ?? ]
+Foster's implementation of incompressiblity along side with method made in class.
+Foster's is more stable!
